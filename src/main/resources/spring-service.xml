@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+            http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+	<!-- Configurer that replaces ${...} placeholders with values from properties 
+		files -->
+	<!-- context:property-placeholder location="classpath:jdbc.properties,classpath:mlottery_te.properties" 
+		/ -->
+	<!-- ApplicationContext will register BeanPostProcessor automatically. -->
+	<bean id="propertyConfigurer"
+		class="com.ramonli.lottery.core.support.XPropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- ==================================================== -->
+	<!-- SERVICE DEFINITION -->
+	<!-- ==================================================== -->
+	<bean id="merchantService" class="com.ramonli.lottery.merchant.service.DefaultMerchantService">
+	   <property name="merchantDao" ref="merchantDao" />
+	</bean>
+
+	<!-- ==================================================== -->
+	<!-- TRANSACTION DEFINITION -->
+	<!-- ==================================================== -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- the transactional advice (what 'happens'; see the <aop:advisor/> bean 
+		below) -->
+	<tx:advice id="defaultTxAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!-- Keep SequenceService in a isolation transaction -->
+			<tx:method name="query*" read-only="true" />
+			<!-- By default, A runtime exception will rollback transaction. -->
+			<tx:method name="*" timeout="10" rollback-for="ApplicationException" />
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config>
+		<aop:pointcut id="service"
+			expression="execution(* com.mpos.lottery.te..service.*Service.*(..))" />
+		<aop:advisor advice-ref="defaultTxAdvice" pointcut-ref="service" />
+	</aop:config>
+</beans>
+

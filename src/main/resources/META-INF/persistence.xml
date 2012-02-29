@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="1.0"
+	xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+
+	<persistence-unit name="lottery" transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect" />
+            <!--  property name="hibernate.hbm2ddl.auto" value="update"/ -->
+            <!--
+                Move hibernate sql-log setting into log4j.xml. 
+            -->
+            <!-- property name="hibernate.show_sql" value="true" / -->
+            <!--  property name="hibernate.format_sql" value="false" / -->
+            <property name="hibernate.jdbc.batch_size" value="20" />
+            <!-- Uncomment this to load hibernate configuration file -->
+            <!--  property name="hibernate.ejb.cfgfile" value="hibernate.cfg.xml"/ -->
+            <!--
+            <property name="hibernate.cglib.use_reflection_optimizer" value="true" />
+            <property name="hibernate.cache.provider_class" value="org.hibernate.cache.EhCacheProvider" />
+            <property name="hibernate.cache.use_query_cache" value="true" />
+            <property name="hibernate.current_session_context_class" value="thread" />
+            -->
+            <!--
+                <property name="hibernate.transaction.factory_class"
+                value="org.hibernate.transaction.JDBCTransactionFactory" />
+            -->
+        </properties>		
+	</persistence-unit>
+</persistence> 
