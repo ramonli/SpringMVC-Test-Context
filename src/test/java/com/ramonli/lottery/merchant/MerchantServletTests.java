@@ -9,7 +9,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.transaction.AfterTransaction;
@@ -55,31 +58,17 @@ import com.ramonli.lottery.test.WebContextLoader;
  * @author Ramon Li
  */
 
-// As our TEST is extended from AbstractTransactionalJUnit4SpringContextTests,
-// no need to state @RunWith explicitly.
 // @RunWith(SpringJUnit4ClassRunner.class)
 
-// If run test against a web interface, for instance SpringMVC
-// DispatcherServlet, a
-// WebApplicationContext instance must be initialized, not default
-// GenericApplicationContext.
-// Here WebContextLoader will delegate request to
-// org.springframework.web.context.ContextLoader
-// to initialize a WebApplicationContext(refer to ContextLoaderListener).
+// Refer to the doc of WebContextLoader.
 @ContextConfiguration(loader = WebContextLoader.class, locations = {
         "classpath:spring-service.xml", "classpath:spring-dao.xml", "classpath:spring-test.xml" })
-// @ContextConfiguration(loader = WebContextLoader.class, locations = {
-// "classpath:spring-dao.xml"})
 // this annonation defines the transaction manager for each test case.
 @TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true)
 // As our TEST extending from AbstractTransactionalJUnit4SpringContextTests,
 // below 3 listeners have been registered by default, and it will be inherited
 // by subclass.
-// @TestExecutionListeners(listeners = {
-// TransactionalTestExecutionListener.class,
-// ShardAwareTestExecutionListener.class })
-// As our TEST is extended from AbstractTransactionalJUnit4SpringContextTests,
-// no need to state @Transactional explicitly.
+// @TestExecutionListeners(listeners = {ShardAwareTestExecutionListener.class})
 // @Transactional
 public class MerchantServletTests extends AbstractTransactionalJUnit4SpringContextTests {
 	private Logger logger = LoggerFactory.getLogger(MerchantServletTests.class);
@@ -99,9 +88,17 @@ public class MerchantServletTests extends AbstractTransactionalJUnit4SpringConte
 	@PersistenceContext(unitName = "lottery")
 	protected EntityManager entityManager;
 
+	// run once for current test suite.
+	@BeforeClass
+	public static void beforeClass() {
+
+	}
+
+	/**
+	 * logic to verify the initial state before a transaction is started
+	 */
 	@BeforeTransaction
 	public void verifyInitialDatabaseState() {
-		// logic to verify the initial state before a transaction is started
 		logger.debug("--------------------------------");
 		logger.debug("@BeforeTransaction:verifyInitialDatabaseState()");
 
@@ -123,52 +120,93 @@ public class MerchantServletTests extends AbstractTransactionalJUnit4SpringConte
 		logger.debug("merchantDao:" + this.merchantDao);
 	}
 
-	// call for each test case.
+	/**
+	 * set up test data within the transaction
+	 */
 	@Before
 	public void setUpTestDataWithinTransaction() {
-		// set up test data within the transaction
 		logger.debug("@Before:setUpTestDataWithinTransaction()");
 
 	}
 
 	@Test
-	public void testQueryByCode() throws Exception{
+	// overrides the class-level defaultRollback setting
+	@Rollback(true)
+	public void testQueryByCode() throws Exception {
 		logger.debug("testQueryByCode::Enter!");
 		// have a try first
 		MockServletContext servletCtx = new MockServletContext();
+		// must set this ApplicationContext which loaded by spring test-context
+		// framework to ServletContext, it will be the parent of the
+		// ApplicationContext loaded by DispatcherServlet from XXX-servlet.xml.
 		servletCtx.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
 		        this.applicationContext);
 		MockServletConfig servletCfg = new MockServletConfig(servletCtx, "lottery");
-		// set SpringMVC configration location 
+		// set SpringMVC configration location...SpringMVC can translate the
+		// init-param into a setter/getter call to DispatcherServlet
+		// automatically.
 		servletCfg.addInitParameter("contextConfigLocation", "META-INF/lottery-servlet.xml");
 		DispatcherServlet servlet = new DispatcherServlet();
+		// must call init() to initialize the context of DispatcherServlet, for
+		// example initialize a WebApplicationContext based on XXX-servlet.xml.
 		servlet.init(servletCfg);
-		
+
 		MockHttpServletRequest req = new MockHttpServletRequest(servletCtx, "GET", "/merchant");
 		MockHttpServletResponse resp = new MockHttpServletResponse();
 		req.addHeader("X-Trans-Type", "200");
+		// SpringMVC will use this header to determine whether the media-type is
+		// supported or not, and choose a appropriate HttpMessageConvert to
+		// convert message body.
 		req.addHeader("Content-Type", "text/plain");
 		req.setContent("hello!".getBytes());
-		
+
 		servlet.service(req, resp);
 		assertEquals("M-111", resp.getContentAsString());
+
+		/**
+		 * False Positive<br/>
+		 * -----------------------------------------------------<br/>
+		 * When you test code involving an ORM framework such as JPA or
+		 * Hibernate, flush the underlying session within test methods which
+		 * update the state of the session. Failing to flush the ORM framework's
+		 * underlying session can produce false positives: your test may pass,
+		 * but the same code throws an exception in a live, production
+		 * environment. For example, you call updateEntityInHibernateSession()
+		 * and end the test, the ORM framework won't flush session to underlying
+		 * database(a exception will be thrown out), so your test passes, false
+		 * positive raises.
+		 * <p>
+		 * Refer to
+		 * http://static.springsource.org/spring/docs/3.1.x/spring-framework
+		 * -reference/html/testing.html#testcontext-tx for more inforamtion.
+		 */
+		// this.entityManager.flush();
 	}
 
-//	@Test
-//	public void testUpdate() {
-//		logger.debug("testUpdate::Enter!");
-//	}
+	// @Test
+	// public void testUpdate() {
+	// logger.debug("testUpdate::Enter!");
+	// }
 
+	/**
+	 * execute "tear down" logic within the transaction.
+	 */
 	@After
 	public void tearDownWithinTransaction() {
-		// execute "tear down" logic within the transaction.
 		logger.debug("@After:tearDownWithinTransaction()");
 	}
 
+	/**
+	 * logic to verify the final state after transaction has rolled back
+	 */
 	@AfterTransaction
 	public void verifyFinalDatabaseState() {
-		// logic to verify the final state after transaction has rolled back
 		logger.debug("@AfterTransaction:verifyFinalDatabaseState()");
+
+	}
+
+	@AfterClass
+	public static void afterClass() {
 
 	}
 }
