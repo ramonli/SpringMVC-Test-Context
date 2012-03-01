@@ -1,1 +1,1 @@
-A research project on springmvc, spring textcontext and JPA.
+A research project on springmvc, spring text-context and JPA.
