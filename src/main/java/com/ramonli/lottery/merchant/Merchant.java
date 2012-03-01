@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Table(name="MERCHANT")
 @Entity
-public class Merchant implements java.io.Serializable{
+public class Merchant implements java.io.Serializable, com.ramonli.lottery.core.Entity{
     private static final long serialVersionUID = 6139641558287268977L;
 
 	@Id

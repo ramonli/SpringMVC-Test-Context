@@ -22,6 +22,11 @@ public class JpaMerchantDao extends JpaDaoSupport implements MerchantDao {
 	}
 
 	public void update(Merchant merchant) throws DataAccessException {
+		/*
+		 * if no @ID assigned to merchant, exception will be thrown out. If
+		 * found entity by @ID, entity will be updated, otherwise insertion will
+		 * be performed.
+		 */
 		this.getJpaTemplate().merge(merchant);
 	}
 }

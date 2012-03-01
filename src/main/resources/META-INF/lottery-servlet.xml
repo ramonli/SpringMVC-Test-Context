@@ -5,7 +5,56 @@
 	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx">
 	<!-- DispatcherServlet Context: defines this servlet's request-processing 
 		infrastructure -->
+
 	<!-- Configures the Spring MVC @Controller programming model -->
 	<context:component-scan base-package="com.ramonli.lottery" />
+
+	<!-- 
+	When initializing DispatcherServlet, all strategies will be initialized first: 
+		protected void initStrategies(ApplicationContext context) {
+	        initMultipartResolver(context);
+	        initLocaleResolver(context);
+	        initThemeResolver(context);
+	        initHandlerMappings(context);
+	        initHandlerAdapters(context);
+	        initHandlerExceptionResolvers(context);
+	        initRequestToViewNameTranslator(context);
+	        initViewResolvers(context);
+	    }
+	When initialize a specific strategy, for exmple HandlerAdapter, below work flow will be 
+	followed:
+	   1) if this.detectAllHandlerAdapters is true(it can be switched by setting servlet init 
+	   param 'detectAllHandlerAdapters' to true or false), all beans with type of HandlerAdapter
+	   will be regiestered...if found, return.
+	   2) if this.detectAllHandlerAdapters is false, it will try to find a bean named 
+	   'handlerAdapter'...if found, return.
+	   3) if no HandlerAdapter found at step#1 and step#2, it will read default HandlerAdapter
+	   configurations from file org.springframework.web.servlet.DispatcherServlet.properties.
+	-->
+	<beans:bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<beans:property name="messageConverters">
+		    <!--
+		    As we declared a custom HttpMessageConverter, all default converter, like 
+		    ByteArrayHttpMessageConverter(), stringHttpMessageConverter, 
+		    SourceHttpMessageConverter() and XmlAwareFormHttpMessageConverter(), will be replaced
+		    by our explicitly declared messageConverters.  
+		    -->
+			<beans:list>
+				<beans:ref bean="stringHttpMessageConverter" />
+				<beans:ref bean="merchantHttpMessageConverter" />
+				<beans:ref bean="xmlAwareFormHttpMessageConverter" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+	<beans:bean id="stringHttpMessageConverter"
+		class="org.springframework.http.converter.StringHttpMessageConverter" />
+		
+    <beans:bean id="xmlAwareFormHttpMessageConverter"
+        class="org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter" />		
+
+	<beans:bean id="merchantHttpMessageConverter"
+		class="com.ramonli.lottery.merchant.web.MerchantHttpMessageConverter" />
 
 </beans:beans>

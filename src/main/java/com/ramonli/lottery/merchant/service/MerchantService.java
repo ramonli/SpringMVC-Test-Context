@@ -6,5 +6,5 @@ public interface MerchantService {
 	
 	Merchant query(String code);
 	
-	void update(Merchant merchant);
+	void merge(Merchant merchant);
 }

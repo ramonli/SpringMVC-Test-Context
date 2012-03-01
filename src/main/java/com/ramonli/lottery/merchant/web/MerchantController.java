@@ -5,16 +5,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.ramonli.lottery.merchant.dao.MerchantDao;
+import com.ramonli.lottery.merchant.Merchant;
+import com.ramonli.lottery.merchant.service.MerchantService;
 
 @Controller
 @RequestMapping(value = "/merchant")
@@ -24,26 +25,42 @@ public class MerchantController {
 	@Autowired
 	private ApplicationContext applicationContext;
 	@Autowired
-	private MerchantDao merchantDao;
+	private MerchantService merchantService;
 
 	@RequestMapping(method = RequestMethod.GET, headers = "X-Trans-Type=200")
 	public @ResponseBody
-	String query(HttpServletRequest req, HttpServletResponse resp, @RequestBody String message) {
+	String query(HttpServletRequest req, HttpServletResponse resp, @RequestBody String code) {
 		logger.debug("query::ENTER!");
-		logger.debug("applicationContext:" + this.applicationContext);
-		logger.debug("merchantDao:" + this.applicationContext.getBeansOfType(MerchantDao.class));
-		logger.debug("merchantDao:"
-		        + BeanFactoryUtils.beansOfTypeIncludingAncestors(this.applicationContext,
-		                MerchantDao.class));
-		logger.debug("merchantDao:" + this.getMerchantDao());
-		try {
-			resp.getWriter().println("I am fucking happy!");
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		return "M-111";
+		Merchant merchant = this.getMerchantService().query(code);
+		return merchant.getName();
 	}
 
+	@RequestMapping(method = RequestMethod.PUT, headers = "X-Trans-Type=201")
+	public void update(HttpServletRequest req, HttpServletResponse resp,
+	        @RequestBody MultiValueMap<String, String> formParams) {
+		logger.debug("update::ENTER!");
+		logger.debug("request: name=" + formParams.getFirst("name") + ",code=" + formParams.getFirst("code"));
+		Merchant merchant = new Merchant();
+		merchant.setId(111);
+		merchant.setCode(formParams.getFirst("code"));
+		merchant.setName(formParams.getFirst("name"));
+		
+		this.getMerchantService().merge(merchant);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, headers = "X-Trans-Type=202")
+	public @ResponseBody Merchant create(HttpServletRequest req, HttpServletResponse resp,
+	        @RequestBody Merchant merchant) {
+		logger.debug("update::ENTER!");
+		logger.debug("request: name=" + merchant.getName() + ",code=" + merchant.getCode());
+		// assign a ID to entity
+		merchant.setId(9999);
+		
+		this.getMerchantService().merge(merchant);
+		
+		return merchant;
+	}	
+	
 	public ApplicationContext getApplicationContext() {
 		return applicationContext;
 	}
@@ -52,12 +69,12 @@ public class MerchantController {
 		this.applicationContext = applicationContext;
 	}
 
-	public MerchantDao getMerchantDao() {
-		return merchantDao;
+	public MerchantService getMerchantService() {
+		return merchantService;
 	}
 
-	public void setMerchantDao(MerchantDao merchantDao) {
-		this.merchantDao = merchantDao;
+	public void setMerchantService(MerchantService merchantService) {
+		this.merchantService = merchantService;
 	}
 
 }

@@ -12,7 +12,7 @@ public class DefaultMerchantService implements MerchantService {
 	}
 
 	@Override
-	public void update(Merchant merchant) {
+	public void merge(Merchant merchant) {
 		// TODO merge client Merchant to JPA context first
 		this.getMerchantDao().update(merchant);
 	}
