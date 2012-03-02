@@ -37,11 +37,16 @@ import org.apache.commons.logging.LogFactory;
  * with a text editor it is full of "funny" characters. The first character in
  * the file is almost always a '0' character (0x30).</li>
  * <li>PEM or base64 format. This is the same data as the DER-encoded file but
- * it is encoded in base64 with additional header and footer lines: -----BEGIN
- * FOO BAR KEY----- MIIBgjAcBgoqhkiG9w0BDAEDMA4ECKZesfWLQOiDAgID6ASCAWBu7izm8N4V
- * 2puRO/Mdt+Y8ceywxiC0cE57nrbmvaTSvBwTg9b/xyd8YC6QK7lrhC9Njgp/ ... -----END FOO
- * BAR KEY----- These files can be viewed with a text editor and can be easily
- * transmitted as part of an email message.</li>
+ * it is encoded in base64 with additional header and footer lines:
+ * <p>
+ * -----BEGIN FOO BAR KEY-----<br/>
+ * MIIBgjAcBgoqhkiG9w0BDAEDMA4ECKZesfWLQOiDAgID6ASCAWBu7izm8N4V
+ * 2puRO/Mdt+Y8ceywxiC0cE57nrbmvaTSvBwTg9b/xyd8YC6QK7lrhC9Njgp/<br/>
+ * ... <br/>
+ * -----END FOO BAR KEY-----
+ * <p>
+ * These files can be viewed with a text editor and can be easily transmitted as
+ * part of an email message.</li>
  * 
  * <li>XML format. There are W3C standards for this, and, er, a .NET way that
  * predates the latest W3C standard. Here is an example of the W3C [XKMS] 2.0
@@ -140,21 +145,22 @@ public class RsaCipher {
 	 */
 	public static String[] generateXmlKeyPair(int keySize) throws Exception {
 		KeySpec[] keySpecs = generateKeyPair(keySize);
-		RSAPublicKeySpec pub = (RSAPublicKeySpec)keySpecs[0];
+		RSAPublicKeySpec pub = (RSAPublicKeySpec) keySpecs[0];
 		String keys[] = new String[2];
 		keys[0] = assembleXMLKeyPair(pub.getModulus(), pub.getPublicExponent());
 		if (logger.isDebugEnabled())
 			logger.debug("Generate RSA public key:" + keys[0]);
-		RSAPrivateKeySpec priv = (RSAPrivateKeySpec)keySpecs[1];
+		RSAPrivateKeySpec priv = (RSAPrivateKeySpec) keySpecs[1];
 		keys[1] = assembleXMLKeyPair(priv.getModulus(), priv.getPrivateExponent());
 		if (logger.isDebugEnabled())
 			logger.debug("Generate RSA private key:" + keys[1]);
 		return keys;
 	}
-	
-	private static String assembleXMLKeyPair(BigInteger modulus, BigInteger publicExponent){
+
+	private static String assembleXMLKeyPair(BigInteger modulus, BigInteger publicExponent) {
 		StringBuffer buffer = new StringBuffer("<RSAKeyValue>");
-		buffer.append(TOKEN_MOD_BEGIN).append(new String(Base64Coder.encode(modulus.toByteArray())));
+		buffer.append(TOKEN_MOD_BEGIN)
+		        .append(new String(Base64Coder.encode(modulus.toByteArray())));
 		buffer.append(TOKEN_MOD_END).append(TOKEN_EXP_BEGIN);
 		buffer.append(new String(Base64Coder.encode(publicExponent.toByteArray())));
 		buffer.append(TOKEN_EXP_END).append("</RSAKeyValue>");
@@ -182,15 +188,15 @@ public class RsaCipher {
 	/**
 	 * Encrypt by public key
 	 * 
-	 * @param xmlKey 	The XMl formatted public key
-	 * @param input		The bytes to be encrypted.
-	 * @return The encrypted bytes. 
+	 * @param xmlKey The XMl formatted public key
+	 * @param input The bytes to be encrypted.
+	 * @return The encrypted bytes.
 	 */
-	public static byte[] encrypt(String xmlKey, byte[] input){
+	public static byte[] encrypt(String xmlKey, byte[] input) {
 		PublicKey publicKey = (PublicKey) getKeyFromXml(xmlKey, true);
 		return encrypt(publicKey, input);
-	}	
-	
+	}
+
 	public static byte[] encrypt(Key publicKey, byte input[]) {
 		try {
 			// get an RSA cipher object and print the
@@ -228,15 +234,15 @@ public class RsaCipher {
 		byte[] output = decrypt(privateKey, input);
 		return new String(output);
 	}
-	
+
 	/**
 	 * Decrypt by private key
 	 * 
-	 * @param xmlKey 	The XMl formatted private key
-	 * @param cipher	The encrypted bytes.
-	 * @return The raw bytes. 
+	 * @param xmlKey The XMl formatted private key
+	 * @param cipher The encrypted bytes.
+	 * @return The raw bytes.
 	 */
-	public static byte[] decrypt(String xmlKey, byte[] cipher){
+	public static byte[] decrypt(String xmlKey, byte[] cipher) {
 		PrivateKey privateKey = (PrivateKey) getKeyFromXml(xmlKey, false);
 		return decrypt(privateKey, cipher);
 	}
@@ -269,7 +275,7 @@ public class RsaCipher {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	/**
 	 * Retrieve public/private key from file, which is XML formatted.
 	 */
@@ -318,7 +324,7 @@ public class RsaCipher {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-	}	
+	}
 
 	/**
 	 * Read private/public key from a .pem file which often generated from
@@ -390,8 +396,8 @@ public class RsaCipher {
 			throw new RuntimeException(e);
 		}
 		return key;
-	}	
-	
+	}
+
 	private static String getKeyComponent(String keyString, boolean isModulus) {
 		int indexBegin = -1;
 		int indexEnd = -1;
@@ -408,7 +414,7 @@ public class RsaCipher {
 	}
 
 	@SuppressWarnings("unused")
-    private static void showProvider(Provider provider) {
+	private static void showProvider(Provider provider) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("\tProvider: " + provider.getName());
 			for (java.util.Iterator itr = provider.keySet().iterator(); itr.hasNext();) {
