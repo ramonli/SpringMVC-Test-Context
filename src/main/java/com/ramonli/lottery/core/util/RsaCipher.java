@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
  * it is encoded in base64 with additional header and footer lines:
  * <p>
  * -----BEGIN FOO BAR KEY-----<br/>
- * MIIBgjAcBgoqhkiG9w0BDAEDMA4ECKZesfWLQOiDAgID6ASCAWBu7izm8N4V
+ * MIIBgjAcBgoqhkiG9w0BDAEDMA4ECKZesfWLQOiDAgID6ASCAWBu7izm8N4V<br/>
  * 2puRO/Mdt+Y8ceywxiC0cE57nrbmvaTSvBwTg9b/xyd8YC6QK7lrhC9Njgp/<br/>
  * ... <br/>
  * -----END FOO BAR KEY-----
