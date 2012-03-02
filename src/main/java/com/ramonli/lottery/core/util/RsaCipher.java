@@ -403,7 +403,6 @@ public class RsaCipher {
 			indexEnd = keyString.indexOf(TOKEN_EXP_END);
 		}
 		if (indexBegin == -1 || indexEnd == -1) {
-			throw new RuntimeException("Wrong key format:" + keyString);
 		}
 		return keyString.substring(indexBegin, indexEnd).trim();
 	}
