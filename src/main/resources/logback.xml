@@ -9,7 +9,7 @@
 	</appender>
 
     <logger name="com.ramonli.lottery" level="TRACE"/>
-    <logger name="org.springframework" level="DEBUG"/>
+    <!-- logger name="org.springframework" level="DEBUG"/ -->
 
 	<root level="WARN">
 		<appender-ref ref="STDOUT" />

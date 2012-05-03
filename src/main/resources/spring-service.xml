@@ -39,10 +39,6 @@
 	<!-- ==================================================== -->
 	<!-- TRANSACTION DEFINITION -->
 	<!-- ==================================================== -->
-	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-		<property name="entityManagerFactory" ref="entityManagerFactory" />
-		<property name="dataSource" ref="dataSource" />
-	</bean>
 
 	<!-- the transactional advice (what 'happens'; see the <aop:advisor/> bean 
 		below) -->
@@ -57,7 +53,7 @@
 
 	<aop:config>
 		<aop:pointcut id="service"
-			expression="execution(* com.mpos.lottery.te..service.*Service.*(..))" />
+			expression="execution(* com.ramonli.lottery..service.*Service.*(..))" />
 		<aop:advisor advice-ref="defaultTxAdvice" pointcut-ref="service" />
 	</aop:config>
 </beans>
