@@ -59,6 +59,11 @@
 	<bean id="merchantDao" class=" com.ramonli.lottery.merchant.dao.JpaMerchantDao">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
+	
+    <!-- Sharded Tax_Date_Range table -->
+    <bean id="taxDateRangeDao" class="com.ramonli.lottery.merchant.dao.JpaTaxDateRangeDao">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
 
 </beans>
 

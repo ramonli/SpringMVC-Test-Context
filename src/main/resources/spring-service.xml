@@ -26,8 +26,14 @@
 	<!-- ==================================================== -->
 	<!-- SERVICE DEFINITION -->
 	<!-- ==================================================== -->
-	<bean id="merchantService" class="com.ramonli.lottery.merchant.service.DefaultMerchantService">
-	   <property name="merchantDao" ref="merchantDao" />
+	<bean id="merchantService"
+		class="com.ramonli.lottery.merchant.service.DefaultMerchantService">
+		<property name="merchantDao" ref="merchantDao" />
+	</bean>
+
+	<bean id="taxDateRangeService" class="com.ramonli.lottery.shard.service.DefaultTaxDateRangeService">
+		<property name="taxDateRangeDao" ref="taxDateRangeDao" />
+		<property name="merchantService" ref="merchantService" />
 	</bean>
 
 	<!-- ==================================================== -->

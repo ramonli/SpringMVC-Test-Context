@@ -10,7 +10,6 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.annotation.Rollback;
 
 import com.ramonli.lottery.merchant.dao.MerchantDao;
 import com.ramonli.lottery.test.BaseServletTests;

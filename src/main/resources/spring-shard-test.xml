@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+            http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+	<bean id="taxDateRangeService" class="com.ramonli.lottery.shard.service.DefaultTaxDateRangeService">
+		<property name="taxDateRangeDao" ref="taxDateRangeDao" />
+		<property name="gameDao" ref="gameDao" />
+	</bean>
+
+	<!-- Sharded Tax_Date_Range table -->
+	<bean id="taxDateRangeDao" class="com.ramonli.lottery.merchant.dao.JpaTaxDateRangeDao">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+	<!-- ============================================== -->
+	<!-- DATASOURCE DEFINITION -->
+	<!-- ============================================== -->
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceUnitName" value="lottery_te" />
+		<property name="dataSource" ref="dataSource" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+		</property>
+	</bean>
+
+	<bean id="dataSource"
+		class="com.mpos.lottery.te.common.dao.ShardKeyRoutingDataSource">
+		<property name="targetDataSources">
+			<map key-type="java.lang.Integer">
+				<entry key="1" value-ref="oracleDataSource" />
+				<entry key="2" value-ref="mysqlDataSource" />
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="oracleDataSource" />
+	</bean>
+
+	<bean id="parentDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="minPoolSize" value="2" />
+		<property name="maxPoolSize" value="4" />
+		<property name="initialPoolSize" value="2" />
+		<property name="maxStatements" value="0" />
+		<property name="maxStatementsPerConnection" value="0" />
+		<property name="checkoutTimeout" value="60000" />
+		<property name="numHelperThreads" value="2" />
+		<property name="debugUnreturnedConnectionStackTraces" value="true" />
+		<property name="unreturnedConnectionTimeout" value="3600" />
+		<property name="maxIdleTime" value="3600" />
+		<property name="idleConnectionTestPeriod" value="300" />
+	</bean>
+
+	<bean id="oracleDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		parent="parentDataSource" destroy-method="close">
+		<property name="driverClass" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="jdbcUrl" value="jdbc:oracle:thin:@192.168.2.9:1521/ORCL" />
+		<property name="user" value="ramonal" />
+		<property name="password" value="ramonal" />
+		<property name="preferredTestQuery" value="select sysdate from DUAL" />
+	</bean>
+
+	<bean id="mysqlDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		parent="parentDataSource" destroy-method="close">
+		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/test" />
+		<property name="user" value="root" />
+		<property name="password" value="root" />
+		<property name="preferredTestQuery" value="select 1" />
+	</bean>
+
+	<!-- ============================================== -->
+	<!-- TRANSACTION DEFINITION -->
+	<!-- ============================================== -->
+
+	<!-- the transactional advice (what 'happens'; see the <aop:advisor/> bean 
+		below) -->
+	<tx:advice id="defaultTxAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!-- Keep SequenceService in a isolation transaction -->
+			<tx:method name="get*" read-only="true" />
+			<!-- By default, A runtime exception will rollback transaction. -->
+			<tx:method name="*" timeout="10" rollback-for="ApplicationException" />
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config>
+		<aop:pointcut id="service"
+			expression="execution(* com.mpos.lottery.te..*Service.*(..))" />
+		<aop:advisor advice-ref="defaultTxAdvice" pointcut-ref="service" />
+	</aop:config>
+</beans>
+
