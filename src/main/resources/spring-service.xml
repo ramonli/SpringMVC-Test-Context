@@ -47,7 +47,7 @@
 			<!-- Keep SequenceService in a isolation transaction -->
 			<tx:method name="query*" read-only="true" />
 			<!-- By default, A runtime exception will rollback transaction. -->
-			<tx:method name="*" timeout="10" rollback-for="ApplicationException" />
+			<tx:method name="*" rollback-for="ApplicationException" />
 		</tx:attributes>
 	</tx:advice>
 
