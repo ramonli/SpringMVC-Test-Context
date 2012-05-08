@@ -1,4 +1,4 @@
-SpringMVC-Test-Context CHANGELOG
+SpringMVC CHANGELOG
 ==========================
 https://github.com/ramonli/SpringMVC-Test-Context
 
