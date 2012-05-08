@@ -2,7 +2,7 @@ SpringMVC-Test-Context CHANGELOG
 ==========================
 https://github.com/ramonli/SpringMVC-Test-Context
 
-Change in version (2.3.1)
+Change in version (Latest)
 --------------------------------------
 ** BUG
 ** NEW FEATURE
