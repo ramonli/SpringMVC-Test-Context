@@ -24,6 +24,14 @@
 		are both included implicitly when using the component-scan element. That 
 		means that the two components are autodetected and wired together - all without 
 		any bean configuration metadata provided in XML. -->
+	<!-- By default, classes annotated with @Component, @Repository, @Service, 
+		or @Controller (or classes annotated with a custom annotation that itself 
+		is annotated with @Component) are the only detected candidate components. 
+		However it is simple to modify and extend this behavior by applying custom 
+		filters. These can be added as either include-filter or exclude-filter sub-elements 
+		of the 'component-scan' element. Each filter element requires the 'type' 
+		and 'expression' attributes. Five filtering options exist as described below. 
+		Refer to http://static.springsource.org/spring/docs/3.0.0.M3/spring-framework-reference/html/ch04s12.html -->
 	<context:component-scan base-package="com.ramonli.lottery" />
 
 	<!-- When initializing DispatcherServlet, all strategies will be initialized 
