@@ -6,40 +6,45 @@
 	<!-- DispatcherServlet Context: defines this servlet's request-processing 
 		infrastructure -->
 
-	<!-- Configures the Spring MVC @Controller programming model -->
+	<!-- Spring 2.5 introduces further stereotype annotations: @Component, @Service 
+		and @Controller. @Component serves as a generic stereotype for any Spring-managed 
+		component; whereas, @Repository, @Service, and @Controller serve as specializations 
+		of @Component for more specific use cases (e.g., in the persistence, service, 
+		and presentation layers, respectively). What this means is that you can annotate 
+		your component classes with @Component, but by annotating them with @Repository, 
+		@Service, or @Controller instead, your classes are more properly suited for 
+		processing by tools or associating with aspects. For example, these stereotype 
+		annotations make ideal targets for pointcuts. Of course, it is also possible 
+		that @Repository, @Service, and @Controller may carry additional semantics 
+		in future releases of the Spring Framework. Thus, if you are making a decision 
+		between using @Component or @Service for your service layer, @Service is 
+		clearly the better choice. Similarly, as stated above, @Repository is already 
+		supported as a marker for automatic exception translation in your persistence 
+		layer. Furthermore, the AutowiredAnnotationBeanPostProcessor and CommonAnnotationBeanPostProcessor 
+		are both included implicitly when using the component-scan element. That 
+		means that the two components are autodetected and wired together - all without 
+		any bean configuration metadata provided in XML. -->
 	<context:component-scan base-package="com.ramonli.lottery" />
 
-	<!-- 
-	When initializing DispatcherServlet, all strategies will be initialized first: 
-		protected void initStrategies(ApplicationContext context) {
-	        initMultipartResolver(context);
-	        initLocaleResolver(context);
-	        initThemeResolver(context);
-	        initHandlerMappings(context);
-	        initHandlerAdapters(context);
-	        initHandlerExceptionResolvers(context);
-	        initRequestToViewNameTranslator(context);
-	        initViewResolvers(context);
-	    }
-	When initialize a specific strategy, for exmple HandlerAdapter, below work flow will be 
-	followed:
-	   1) if this.detectAllHandlerAdapters is true(it can be switched by setting servlet init 
-	   param 'detectAllHandlerAdapters' to true or false), all beans with type of HandlerAdapter
-	   will be regiestered...if found, return.
-	   2) if this.detectAllHandlerAdapters is false, it will try to find a bean named 
-	   'handlerAdapter'...if found, return.
-	   3) if no HandlerAdapter found at step#1 and step#2, it will read default HandlerAdapter
-	   configurations from file org.springframework.web.servlet.DispatcherServlet.properties.
-	-->
+	<!-- When initializing DispatcherServlet, all strategies will be initialized 
+		first: protected void initStrategies(ApplicationContext context) { initMultipartResolver(context); 
+		initLocaleResolver(context); initThemeResolver(context); initHandlerMappings(context); 
+		initHandlerAdapters(context); initHandlerExceptionResolvers(context); initRequestToViewNameTranslator(context); 
+		initViewResolvers(context); } When initialize a specific strategy, for exmple 
+		HandlerAdapter, below work flow will be followed: 1) if this.detectAllHandlerAdapters 
+		is true(it can be switched by setting servlet init param 'detectAllHandlerAdapters' 
+		to true or false), all beans with type of HandlerAdapter will be regiestered...if 
+		found, return. 2) if this.detectAllHandlerAdapters is false, it will try 
+		to find a bean named 'handlerAdapter'...if found, return. 3) if no HandlerAdapter 
+		found at step#1 and step#2, it will read default HandlerAdapter configurations 
+		from file org.springframework.web.servlet.DispatcherServlet.properties. -->
 	<beans:bean
 		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
 		<beans:property name="messageConverters">
-		    <!--
-		    As we declared a custom HttpMessageConverter, all default converter, like 
-		    ByteArrayHttpMessageConverter(), stringHttpMessageConverter, 
-		    SourceHttpMessageConverter() and XmlAwareFormHttpMessageConverter(), will be replaced
-		    by our explicitly declared messageConverters.  
-		    -->
+			<!-- As we declared a custom HttpMessageConverter, all default converter, 
+				like ByteArrayHttpMessageConverter(), stringHttpMessageConverter, SourceHttpMessageConverter() 
+				and XmlAwareFormHttpMessageConverter(), will be replaced by our explicitly 
+				declared messageConverters. -->
 			<beans:list>
 				<beans:ref bean="stringHttpMessageConverter" />
 				<beans:ref bean="merchantHttpMessageConverter" />
@@ -50,9 +55,9 @@
 
 	<beans:bean id="stringHttpMessageConverter"
 		class="org.springframework.http.converter.StringHttpMessageConverter" />
-		
-    <beans:bean id="xmlAwareFormHttpMessageConverter"
-        class="org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter" />		
+
+	<beans:bean id="xmlAwareFormHttpMessageConverter"
+		class="org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter" />
 
 	<beans:bean id="merchantHttpMessageConverter"
 		class="com.ramonli.lottery.merchant.web.MerchantHttpMessageConverter" />
