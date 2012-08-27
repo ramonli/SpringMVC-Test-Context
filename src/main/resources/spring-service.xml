@@ -53,7 +53,7 @@
 
 	<aop:config>
 		<aop:pointcut id="service"
-			expression="execution(* com.ramonli.lottery..service.*Service.*(..))" />
+			expression="execution(* com.ramonli.lottery..*Controller.*(..))" />
 		<aop:advisor advice-ref="defaultTxAdvice" pointcut-ref="service" />
 	</aop:config>
 </beans>

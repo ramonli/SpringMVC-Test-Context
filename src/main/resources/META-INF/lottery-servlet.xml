@@ -38,7 +38,7 @@
 		first: protected void initStrategies(ApplicationContext context) { initMultipartResolver(context); 
 		initLocaleResolver(context); initThemeResolver(context); initHandlerMappings(context); 
 		initHandlerAdapters(context); initHandlerExceptionResolvers(context); initRequestToViewNameTranslator(context); 
-		initViewResolvers(context); } When initialize a specific strategy, for exmple 
+		initViewResolvers(context); } When initialize a specific strategy, for example 
 		HandlerAdapter, below work flow will be followed: 1) if this.detectAllHandlerAdapters 
 		is true(it can be switched by setting servlet init param 'detectAllHandlerAdapters' 
 		to true or false), all beans with type of HandlerAdapter will be regiestered...if 
