@@ -7,6 +7,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javassist.Modifier;
+import javassist.util.proxy.MethodFilter;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.support.AopUtils;
@@ -210,6 +213,15 @@ public class RoutineMetaDataBeanPostProcessor implements BeanPostProcessor {
 						        + bean + "), and register it under key(" + routineStrategy + ").");
 					}
 				}
+			}
+		}, new ReflectionUtils.MethodFilter() {
+
+			/**
+			 * Only public method supported.
+			 */
+			@Override
+			public boolean matches(Method method) {
+				return Modifier.isPublic(method.getModifiers());
 			}
 		});
 	}
