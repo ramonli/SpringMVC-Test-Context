@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javassist.Modifier;
-import javassist.util.proxy.MethodFilter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
