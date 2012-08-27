@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
 public @interface RequestMap {
 
 	/**
-	 * Sprcify the request type of transaction. The format of value must follow
-	 * the definition of {@link RoutineStrategy#from(RequestMap)}, it is totally
+	 * Sprcify the router criteria. The format of value must follow the
+	 * definition of {@link RoutineStrategy#from(RequestMap)}, it is totally
 	 * implementation dependent.
 	 */
 	String value();
