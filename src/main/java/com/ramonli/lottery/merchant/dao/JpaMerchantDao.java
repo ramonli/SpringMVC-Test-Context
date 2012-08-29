@@ -5,13 +5,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.orm.jpa.support.JpaDaoSupport;
+import org.springframework.stereotype.Repository;
 
+import com.ramonli.lottery.core.support.dao.BaseJpaDao;
 import com.ramonli.lottery.merchant.Merchant;
 
-public class JpaMerchantDao extends JpaDaoSupport implements MerchantDao {
+@Repository("merchantDao")
+public class JpaMerchantDao extends BaseJpaDao implements MerchantDao {
 
+	@SuppressWarnings("unchecked")
 	public Merchant getByCode(String code) throws DataAccessException {
+		/*
+		 * Test @PersistenceUnit and @PersistenceContext
+		 */
+		logger.debug("****" + this.getJpaEntityManager());
+
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("merchantCode", code);
 		List<Merchant> result = this.getJpaTemplate().findByNamedParams(

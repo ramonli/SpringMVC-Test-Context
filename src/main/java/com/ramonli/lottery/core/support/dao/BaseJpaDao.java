@@ -7,13 +7,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.orm.jpa.support.JpaDaoSupport;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Multiple entities which inherit from same superclass, each entity will maps
@@ -21,6 +22,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class BaseJpaDao extends JpaDaoSupport {
 	protected Log logger = LogFactory.getLog(BaseJpaDao.class);
+	private EntityManager jpaEntityManager;
 
 	public void insert(Object entity) {
 		this.getJpaTemplate().persist(entity);
@@ -32,6 +34,47 @@ public class BaseJpaDao extends JpaDaoSupport {
 
 	public <T> T findById(Class<T> clazz, String id) {
 		return this.getJpaTemplate().find(clazz, id);
+	}
+
+	public EntityManager getJpaEntityManager() {
+		return jpaEntityManager;
+	}
+
+	/**
+	 * Actually it is a better idea to implement DAO or @Repository based on
+	 * plain JPA, while <code>BaseJpaDao</code> is extended from
+	 * <code>JpaDaoSupport</code>, and
+	 * <code>JapDaoSupport#{@link #setEntityManager(EntityManager)} is a final method, 
+	 * it means you can't announce <code>@PersistenceContext</code> one your
+	 * subclass <code>BaseJpaDao</code>.
+	 * <p>
+	 * To be compatible with legacy code, and also to make use of Component-scan
+	 * feature of spring framework(then you don't need to configure DAO in xml
+	 * file each time), I define thie method to auto wire
+	 * <code>EntityManager</code> dependency.
+	 * <p>
+	 * Be noted that we use <code>PersistenceContext</code> which maps to JPA
+	 * <code>EntityManager</code>, not <code>@PersistenceUnit</code> which maps
+	 * to JPA <code>EntityManagerFactory</code>. As
+	 * <code>EntityManagerFactory{@link #createJpaTemplate(EntityManager)}</code>
+	 * will always create a new <code>EntityManager</code>, while
+	 * <code>PersistenceContext</code> maps to a shared entity manager which is
+	 * is a shared, thread-safe proxy for the actual transactional
+	 * EntityManager.
+	 * <p>
+	 * Now the question is how this injected <code>EntityManager</code> linked
+	 * to the <code>EntityManagerFactory</code> which will be configured in
+	 * Spring configuration file? The secrect is at your transaction definition.
+	 * In this project, I marked a transaction which associates with a
+	 * <code>EntityManagerFactory</code> at the pointcut
+	 * "execution(* com.ramonli.lottery..*Controller.*(..))", and the share
+	 * entity manager of this <code>EntityManagerFactory</code> will be
+	 * injected.
+	 */
+	@PersistenceContext
+	public void setJpaEntityManager(EntityManager jpaEntityManager) {
+		this.jpaEntityManager = jpaEntityManager;
+		this.setEntityManager(jpaEntityManager);
 	}
 
 	/**
