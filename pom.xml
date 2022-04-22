@@ -50,7 +50,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>3.0.5-RELEASE</version>
+			<version>5.3.19</version>
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/spring-3.0.5/org.springframework.core-3.0.5.RELEASE.jar</systemPath>
 		</dependency>
